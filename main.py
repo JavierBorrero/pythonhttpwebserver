@@ -1,16 +1,16 @@
-from io import TextIOWrapper
+import socket
 
-def getLines(f: TextIOWrapper):
+def getLines(f: socket.socket):
     string = ""
     try:
         while True:
             data = bytes(8)
-            n = f.read(len(data))
+            n = f.recv(len(data))
             if not n:
                 break;
             
             # add reading to data
-            data = data + n.encode()
+            data = data + n
             
             # find \n in data
             idx = data.find(b'\n')
@@ -32,10 +32,14 @@ def getLines(f: TextIOWrapper):
 
 
 def main():
-    file = open("./message.txt", "r")
+    server = socket.create_server(("localhost", 1234))
+
+    while True:
+        conn, addr = server.accept()
     
-    for line in getLines(file):
-        print("read: " + line)
+        for line in getLines(conn):
+            print("read: " + line)
+
 
 if __name__ == "__main__":
     main()
