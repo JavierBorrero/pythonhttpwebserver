@@ -1,16 +1,16 @@
 import socket
 
-def getLines(f: socket.socket):
+def getLines(f):
     string = ""
     try:
         while True:
             data = bytes(8)
-            n = f.recv(len(data))
+            n = f.read(len(data))
             if not n:
                 break;
             
             # add reading to data
-            data = data + n
+            data = data + n.encode()
             
             # find \n in data
             idx = data.find(b'\n')
@@ -36,8 +36,14 @@ def main():
 
     while True:
         conn, addr = server.accept()
-    
-        for line in getLines(conn):
+        
+        '''
+        makefile() returns a file object associated with the socket
+
+        A file object is an object exposing a file-oriented API
+        (with methods such as read() or write()) to an underlying resource
+        '''
+        for line in getLines(conn.makefile('r')):
             print("read: " + line)
 
 
