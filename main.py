@@ -1,6 +1,6 @@
 import socket
 
-def getLines(f):
+def get_lines(f):
     string = ""
     try:
         while True:
@@ -43,7 +43,7 @@ def main():
         A file object is an object exposing a file-oriented API
         (with methods such as read() or write()) to an underlying resource
         '''
-        for line in getLines(conn.makefile('r')):
+        for line in get_lines(conn.makefile('r')):
             print("read: " + line)
 
 
