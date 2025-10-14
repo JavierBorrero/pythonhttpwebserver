@@ -14,7 +14,6 @@ class Request:
 
 NO_ERROR = ""
 ERROR_MALFORMED_REQUEST_LINE = "malformed request-line"
-
 SEPARATOR = "\r\n"
 
 def parse_request_line(s: str) -> Tuple[RequestLine, str, str]:

@@ -5,6 +5,7 @@ from io import StringIO
 
 from request import request_from_reader
 
+
 class TestRequest(unittest.TestCase):
     def test_request_line_parse(self):
         # Good GET Request line
