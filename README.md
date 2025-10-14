@@ -17,3 +17,29 @@ Una función generadora es un tipo especial de función que devuelve un objeto i
 - Lazy Evaluation: Calculan los valores solo cuando se necesitan, lo que mejora el rendimiento
 - Soporte para secuencias infinitas: Son ideales para generar datos sin límite, como la serie de Fibonacci
 - Procesamiento en cadena (pipeline): Se pueden encadenar generadores para procesar datos por etapas de forma eficiente
+
+### HTTP Message
+
+Todos los mensajes HTTP empiezan de la siguiente forma: Primero tenemos la "request line", que se compone por el método de la petición (GET, POST, ...). Luego tenemos el path del recurso al que queremos acceder (/home, /cat, ...). Por último la versión del protocolo, en este caso HTTP/1.1
+
+```
+METHOD /resource-path PROTOCOL-VERSION\r\n   ==> GET /cat HTTP/1.1\r\n
+```
+
+Después de la request line tenemos las "field lines", más conocidas como headers
+
+```
+field-name: field-value\r\n
+field-name: field-value\r\n
+field-name: field-value\r\n
+```
+
+Para terminar, la petición cierra con un `\r\n` y a partir de aquí empieza el `body`. La petición al completo:
+
+```
+METHOD /resource-path PROTOCOL-VERSION\r\n
+field-name: field-value\r\n
+field-name: field-value\r\n
+field-name: field-value\r\n
+\r\n
+```
