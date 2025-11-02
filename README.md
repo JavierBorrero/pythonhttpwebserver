@@ -43,3 +43,19 @@ field-name: field-value\r\n
 field-name: field-value\r\n
 \r\n
 ```
+
+### Field Syntax
+
+Cada `field-line` consiste en en un `field-name`, seguido de dos puntos (`:`), espacios opcionales antes del valor, `field-value`, y espacios opcionales después del valor.
+
+```
+field-line  = field-name ":" OWS field-value OWS
+```
+
+**Field Line Parsing**
+
+Los mensajes se analizan usando un algoritmo genérico, independiente de los *field names* individuales. No se permite ningún espacio en blanco entre el *field name* y los dos puntos. Las diferencias en el manejo de este espacio han causado vulnerabilidades de seguridad en el enrutamiento de solicitudes y el manejo de respuestas.
+
+Un servidor debe rechazar cualquier mensaje de solicitud que contenga espacios en blanco entre el *field name* y los dos puntos, respondiendo con un código 400 (bad request).
+
+Un *field value* puede estar precedido y/o seguido por *optional whitespace (OWS)*. Para mejorar la legibilidad por parte de humanos, se prefiere un solo espacio (`SP`) antes del *field value*. Sin embargo, ese espacio antes o después no forma parte del *field value*, el parser lo excluye cuando extrae el valor real.
