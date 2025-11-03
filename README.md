@@ -59,3 +59,36 @@ Los mensajes se analizan usando un algoritmo genérico, independiente de los *fi
 Un servidor debe rechazar cualquier mensaje de solicitud que contenga espacios en blanco entre el *field name* y los dos puntos, respondiendo con un código 400 (bad request).
 
 Un *field value* puede estar precedido y/o seguido por *optional whitespace (OWS)*. Para mejorar la legibilidad por parte de humanos, se prefiere un solo espacio (`SP`) antes del *field value*. Sin embargo, ese espacio antes o después no forma parte del *field value*, el parser lo excluye cuando extrae el valor real.
+
+### Field Names
+
+HTTP usa `fields` para enviar información adicional en pares nombre/valor:
+
+```
+field-name      = token
+```
+
+Estos `fields` se incluyen en los `headers`, y cada `field` tiene un nombre que identifica su propósito. Por ejemplo, el campo `Date` indica la fecha y hora en que se generó el mensaje.
+
+La especificación también dice que los `field-name` no distinguen mayúsculas/minúsculas (`Date`, `DATE` y `date` significan lo mismo).
+
+**Tokens**
+
+Los tokens son identificadores textuales cortos que no incluyen espacios en blanco ni delimitadores
+
+```
+  token          = 1*tchar
+
+  tchar          = "!" / "#" / "$" / "%" / "&" / "'" / "*"
+                 / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
+                 / DIGIT / ALPHA
+                 ; any VCHAR, except delimiters
+```
+
+Se usan para nombrar cosas como campos, parámetros o tipos de contenido. Por ejemplo:
+
+```
+Content-Type: text/html
+```
+
+`text/html` contiene dos tokens, `text` y `html`, separador por el delimitador `/`.
