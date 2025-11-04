@@ -4,10 +4,16 @@ ERROR_MALFORMED_FIELD_LINE = "malformed field line"
 ERROR_MALFORMED_FIELD_NAME = "malformed field name"
 
 class Headers:
-    data: dict[str, str]
+    headers: dict[str, str]
     
     def __init__(self, data: dict[str, str] = {}) -> None:
-        self.data = data
+        self.headers = data
+
+    def get(self, name: str) -> str:
+        return self.headers[name.lower()]
+
+    def set(self, name: str, value: str):
+        self.headers[name.lower()] = value
 
     def parse(self, data: bytearray) -> tuple[int, bool]:
         read = 0
@@ -29,8 +35,12 @@ class Headers:
             if err != NO_ERROR:
                 return 0, False
 
+            if not is_token(name.encode()):
+                return 0, False
+
             read += idx + len(rn)
-            self.data[name] = value
+            #self.headers[name] = value
+            self.set(name, value)
 
         return read, done
 
@@ -48,3 +58,19 @@ def parse_header(field_line: bytearray) -> tuple[str, str, str]:
         return "", "", ERROR_MALFORMED_FIELD_NAME
 
     return name.decode(), value, NO_ERROR
+
+def is_token(str: bytes) -> bool:
+
+    for b in str:
+        ch = chr(b)
+        match ch:
+            case _ if ch.isalpha():
+                continue
+            case _ if ch.isdigit():
+                continue
+            case "!" | "#" | "$" | "%" | "&" | "'" | "*" | "+" | "-" | "." | "^" | "_" | "`" | "|" | "~":
+                continue
+            case _:
+                return False
+
+    return True
