@@ -85,10 +85,9 @@ Los tokens son identificadores textuales cortos que no incluyen espacios en blan
                  ; any VCHAR, except delimiters
 ```
 
-Se usan para nombrar cosas como campos, parámetros o tipos de contenido. Por ejemplo:
+El `field-name` solo puede contener:
 
-```
-Content-Type: text/html
-```
-
-`text/html` contiene dos tokens, `text` y `html`, separador por el delimitador `/`.
+- Letras mayúsculas: A-Z
+- Letras minúsculas: a-z
+- Dígitos: 0-9
+- Carácteres especiales: `!`,`#`,`$`,`%`,`&`,`'`,`*`,`+`,`-`,`.`,`^`,`_`,```,`|`,`~`.
