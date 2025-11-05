@@ -18,16 +18,21 @@ class TestRequest(unittest.TestCase):
         headers = Headers()
         data = bytearray("      Host : localhost:1234       \r\n\r\n".encode())
         n, done = headers.parse(data)
-        self.assertEqual("localhost:1234", headers.get("HOST"))
         self.assertEqual(0, n)
         self.assertFalse(done)
 
-        # Invalid spacing header
+        # Invalid field name token
         headers = Headers()
         data = bytearray("H@st: localhost:1234\r\n\r\n".encode())
         n, done = headers.parse(data)
-        self.assertEqual("localhost:1234", headers.get("HOST"))
         self.assertEqual(0, n)
+        self.assertFalse(done)
+
+        # Valid multiple field values
+        headers = Headers()
+        data = bytearray("Host: localhost:1234\r\nHost: localhost:1234\r\n".encode())
+        n, done = headers.parse(data)
+        self.assertEqual("localhost:1234,localhost:1234", headers.get("HOST"))
         self.assertFalse(done)
 
 if __name__ == '__main__':

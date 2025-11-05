@@ -6,14 +6,25 @@ ERROR_MALFORMED_FIELD_NAME = "malformed field name"
 class Headers:
     headers: dict[str, str]
     
-    def __init__(self, data: dict[str, str] = {}) -> None:
+    def __init__(self, data: dict[str, str] | None = None)-> None:
+        if data is None:
+            data = {}
         self.headers = data
 
     def get(self, name: str) -> str:
         return self.headers[name.lower()]
 
     def set(self, name: str, value: str):
-        self.headers[name.lower()] = value
+        name = name.lower()
+
+        try:
+            v = self.headers[name]
+
+            if v:
+                self.headers[name] = f"{v},{value}"
+        except:
+            self.headers[name] = value
+
 
     def parse(self, data: bytearray) -> tuple[int, bool]:
         read = 0
