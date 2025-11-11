@@ -78,12 +78,12 @@ def request_from_reader(reader) -> Request:
 
     buf = bytearray(1024)
     buf_len = 0
-
+    
     while not request.done():
-        #n, buf = reader.read(buf[buf_len:])
-        buf = bytearray(reader.read(len(buf)))
+        n, err = reader.read(buf)
 
-        n = len(buf)
+        if err != None:
+            return request
         
         buf_len += n
         
@@ -91,5 +91,5 @@ def request_from_reader(reader) -> Request:
         
         buf[:buf_len - readN] = buf[readN:buf_len]
         buf_len -= readN
-
+    
     return request
