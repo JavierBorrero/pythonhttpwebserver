@@ -1,8 +1,4 @@
-from dataclasses import dataclass
-from turtle import pos
 import unittest
-
-from io import StringIO
 
 from request import request_from_reader
 
@@ -18,18 +14,18 @@ class ChunkReader:
         self.pos = pos
 
     def copy_bytes(self, dst: bytearray, src: bytes) -> int:
-        n = min(len(dst), len(src))
-        dst[:n] = src[:n]
+        n = min(len(dst) - self.pos, len(src))
+        dst[self.pos:self.pos + n] = src[:n]
         return n
 
-    def read(self, b: bytearray) -> tuple[int, bytearray]:
+    def read(self, b: bytearray) -> tuple[int, BaseException | None]:
         if self.pos >= len(self.data):
-            return 0, bytearray()
+            return 0, EOFError()
 
         end_index = self.pos + self.num_bytes_per_read
         if end_index > len(self.data):
             end_index = len(self.data)
-
+        
         n = self.copy_bytes(b, self.data[self.pos:end_index].encode())
 
         self.pos += n
@@ -37,8 +33,8 @@ class ChunkReader:
         if n > self.num_bytes_per_read:
             n = self.num_bytes_per_read
             self.pos -= n - self.num_bytes_per_read
-
-        return n, bytearray(self.data, 'utf-8')
+        
+        return n, None
 
 class TestRequest(unittest.TestCase):
     def test_request_line_parse(self):
