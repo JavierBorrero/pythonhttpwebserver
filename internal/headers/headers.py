@@ -30,19 +30,17 @@ class Headers:
     def parse(self, data: bytearray) -> tuple[int, bool, str]:
         read = 0
         done = False
-
         while True:
             try:
                 idx = bytearray.index(data[read:], rn)
             except ValueError:
                 break
             
-            # Empty header
+            # Empty header (\r\n\r\n)
             if idx == 0:
                 done = True
                 read += len(rn)
                 break
-
             name, value, err = parse_header(data[read:read+idx])
             if err != NO_ERROR:
                 return 0, False, err

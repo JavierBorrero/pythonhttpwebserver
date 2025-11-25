@@ -36,6 +36,7 @@ class TestRequest(unittest.TestCase):
         data = bytearray("Host: localhost:1234\r\nHost: localhost:1234\r\n".encode())
         n, done, err = headers.parse(data)
         self.assertEqual("localhost:1234,localhost:1234", headers.get("HOST"))
+        self.assertEqual(44, n)
         self.assertFalse(done)
 
 if __name__ == '__main__':
