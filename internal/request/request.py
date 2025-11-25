@@ -1,9 +1,17 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import override
+
+from internal.headers.headers import Headers
+
+NO_ERROR = ""
+ERROR_MALFORMED_REQUEST_LINE = "malformed request-line"
+SEPARATOR = "\r\n".encode()
 
 class ParserState(Enum):
     INIT = "init",
     DONE = "done",
+    HEADERS = "headers",
 
 @dataclass
 class RequestLine:
@@ -13,18 +21,25 @@ class RequestLine:
 
 class Request:
     request_line: RequestLine
+    headers: Headers
     state: ParserState
 
-    def __init__(self, request_line: RequestLine, state: ParserState) -> None:
+    def __init__(self, request_line: RequestLine, headers: Headers, state: ParserState) -> None:
         self.request_line = request_line
+        self.headers = headers
         self.state = state
+    
+    @override
+    def __str__(self) -> str:
+        return f"Request(\n  request_line={self.request_line},\n  headers={self.headers.headers},\n  state={self.state}\n)"
 
     def parse(self, data: bytearray) -> int:
         read = 0
+        current_data = data[read:]
 
         match self.state:
             case ParserState.INIT:
-                rl, n, err = parse_request_line(data[read:])
+                rl, n, err = parse_request_line(current_data)
                 if err:
                     return 0
 
@@ -34,18 +49,35 @@ class Request:
                 self.request_line = rl
                 read += n
                 
-                self.state = ParserState.DONE
+                self.state = ParserState.HEADERS
+            
+            case ParserState.HEADERS:
+                # normally current_data will look like this:
+                # GET / HTTP/1.1\r\nHost:
+                # but it needs to look like this:
+                # Host: ...
+                # so i do this:
+                # self.headers.parse(current_data[idx+len(SEPARATOR):])
+                try:
+                    idx = bytearray.index(current_data, SEPARATOR)
+                except ValueError:
+                    return 0
+                n, done, err = self.headers.parse(current_data[idx+len(SEPARATOR):])
+
+                if err:
+                    return 0
+
+                read += n
+
+                if done:
+                    self.state = ParserState.DONE
 
             case ParserState.DONE:
                 return read
-        return 0
+        return read
 
     def done(self) -> bool:
         return self.state == ParserState.DONE
-
-NO_ERROR = ""
-ERROR_MALFORMED_REQUEST_LINE = "malformed request-line"
-SEPARATOR = '\r\n'.encode()
 
 def parse_request_line(b: bytearray) -> tuple[RequestLine, int, str]:
     try:
@@ -53,9 +85,9 @@ def parse_request_line(b: bytearray) -> tuple[RequestLine, int, str]:
     except ValueError:
         # havent first found \r\n, not able to parse start line
         return RequestLine(), 0, NO_ERROR
-   
+
     start_line = b[:idx]
-    read = idx + len(SEPARATOR)
+    read = idx
 
     parts = bytearray.split(start_line, " ".encode())
     
@@ -73,15 +105,15 @@ def parse_request_line(b: bytearray) -> tuple[RequestLine, int, str]:
     return request_line, read, NO_ERROR
 
 def request_from_reader(reader) -> Request:
-
-    request = Request(request_line=RequestLine(), state=ParserState.INIT)
+    request = Request(request_line=RequestLine(), headers=Headers(), state=ParserState.INIT)
 
     buf = bytearray(1024)
     buf_len = 0
     
     while not request.done():
-        n, err = reader.read(buf)
-
+        mv = memoryview(buf)[buf_len:]
+        n, err = reader.read(mv)
+        # n = 3 - err = None
         if err != None:
             return request
         
